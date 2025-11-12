@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a Ticket</title>
+</head>
+<body>
+    <h1>Book a Ticket</h1>
+    <form id="bookTicketForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" required>
+        <br>
+
+        <label for="age">Age:</label>
+        <input type="text" id="age" required>
+        <br>
+
+        <label for="gender">Gender:</label>
+        <select id="gender">
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+        <br>
+
+        <label for="trainNumber">Train Number:</label>
+        <input type="text" id="trainNumber" required>
+        <br>
+
+        <button type="submit">Book Ticket</button>
+    </form>
+
+    <div id="successMessage" style="display: none; color: green;">
+        Ticket booked successfully!
+    </div>
+
+    <div id="errorMessage" style="display: none; color: red;">
+        Error booking ticket. Please try again!
+    </div>
+
+    <script>
+        document.getElementById("bookTicketForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById("name").value;
+            const age = document.getElementById("age").value;
+            const gender = document.getElementById("gender").value;
+            const trainNumber = document.getElementById("trainNumber").value;
+
+            // Validate Name (Check for numbers in name)
+            if (/[^a-zA-Z\s]/.test(name)) {
+                alert("Name should only contain alphabets!");
+                return;
+            }
+
+            // Validate Age (Check for alphabets in age)
+            if (isNaN(age) || age <= 0) {
+                alert("Please enter a valid age!");
+                return;
+            }
+
+            // POST data to the server
+            fetch('/api/book-ticket', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, age, gender, trainNumber })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Ticket booked successfully!') {
+                    document.getElementById("successMessage").style.display = 'block';
+                    document.getElementById("errorMessage").style.display = 'none';
+                } else {
+                    document.getElementById("successMessage").style.display = 'none';
+                    document.getElementById("errorMessage").style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById("successMessage").style.display = 'none';
+                document.getElementById("errorMessage").style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>

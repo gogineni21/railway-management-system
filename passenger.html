@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passenger Information</title>
+    <link rel="stylesheet" href="style.css"> <!-- Link to CSS for styling -->
+</head>
+<body>
+    <h1>Passenger Information</h1>
+    <form id="passengerForm">
+        <label for="name">Full Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age" required><br><br>
+
+        <label for="gender">Gender:</label>
+        <select id="gender" name="gender" required>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+        </select><br><br>
+
+        <button type="submit">Add Passenger</button>
+    </form>
+
+    <h2>Passenger List</h2>
+    <table id="passengerTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Gender</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be inserted here -->
+        </tbody>
+    </table>
+
+    <script src="api.js"></script> <!-- API call script -->
+    <script>
+        // Fetch all passengers from the database and populate the table
+        async function getPassengers() {
+            try {
+                const response = await fetch('/api/passengers');
+                const passengers = await response.json();
+                const tableBody = document.getElementById('passengerTable').getElementsByTagName('tbody')[0];
+                tableBody.innerHTML = ''; // Clear current table rows
+
+                passengers.forEach(passenger => {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = passenger.name;
+                    row.insertCell(1).textContent = passenger.age;
+                    row.insertCell(2).textContent = passenger.gender;
+                });
+            } catch (err) {
+                console.error('Error fetching passenger data:', err);
+            }
+        }
+
+        // Submit form data to the backend and add a new passenger
+        document.getElementById('passengerForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const age = document.getElementById('age').value;
+            const gender = document.getElementById('gender').value;
+
+            const newPassenger = {
+                name,
+                age,
+                gender
+            };
+
+            try {
+                const response = await fetch('/api/passengers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newPassenger)
+                });
+
+                if (response.ok) {
+                    getPassengers(); // Refresh the passenger list
+                } else {
+                    alert('Error adding passenger');
+                }
+            } catch (err) {
+                console.error('Error adding passenger:', err);
+            }
+        });
+
+        // Initialize by fetching passengers when the page loads
+        window.onload = getPassengers;
+    </script>
+</body>
+</html>
